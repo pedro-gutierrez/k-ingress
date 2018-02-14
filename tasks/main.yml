@@ -1,0 +1,14 @@
+---
+- name: Delete {{ name }} ingress
+  shell: "kubectl delete ingress {{ name }} --namespace={{ ns }}"
+  ignore_errors: yes
+
+- name: Wait for {{ name }} ingress to be deleted
+  shell: "kubectl get ingresses --namespace={{ ns }}"
+  register: result
+  until: "result.stdout.find(name) == -1"
+  retries: "{{ retry.max }}"
+  delay: "{{ retry.delay }}"
+
+- name: Create {{ name }} ingress 
+  shell: "kubectl create -f {{ yamls }}/{{ name }}-ingress.yml"
