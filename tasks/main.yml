@@ -11,4 +11,4 @@
   delay: "{{ retry.delay }}"
 
 - name: "Create {{ name }} ingress (from file: {{ yamls }}/{{ file }}-ingress.yml)"
-  shell: "kubectl create -f {{ yamls }}/{{ name }}-ingress.yml"
+  shell: "kubectl create -f {{ yamls }}/{{ file }}-ingress.yml"
