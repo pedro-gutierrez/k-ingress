@@ -2,13 +2,19 @@
 - name: Delete {{ name }} ingress
   shell: "kubectl delete ingress {{ name }} --namespace={{ ns }}"
   ignore_errors: yes
+  when: with_list is not defined
 
-- name: Wait for {{ name }} ingress to be deleted
-  shell: "kubectl get ingresses --namespace={{ ns }} --output=jsonpath={.items..metadata.name}"
-  register: result
-  until: "result.stdout.find(name) == -1"
-  retries: "{{ retry.max }}"
-  delay: "{{ retry.delay }}"
+- name: "Delete {{ naming.prefix }} ingresses"
+  shell: "kubectl delete ingress {{ naming.prefix }}-{{ item[naming.prop] }} --namespace={{ ns }}"
+  ignore_errors: yes
+  with_items: "{{ with_list }}"
+  when: with_list is defined and naming is defined
 
 - name: "Create {{ name }} ingress (from file: {{ yamls }}/{{ file }}-ingress.yml)"
   shell: "kubectl create -f {{ yamls }}/{{ file }}-ingress.yml"
+  when: with_list is not defined
+
+- name: "Create {{ naming.prefix }} ingresses"
+  shell: "kubectl create -f {{ yamls }}/{{ naming.prefix }}-{{ item[naming.prop] }}-service.yml"
+  with_items: "{{ with_list }}"
+  when: with_list is defined and naming is defined
